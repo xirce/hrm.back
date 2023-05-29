@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SkillSystem.IdentityServer4.Configuration;
 using SkillSystem.IdentityServer4.Data;
 using SkillSystem.IdentityServer4.Data.Entities;
 
@@ -9,11 +10,13 @@ public class Startup
 {
     private readonly IWebHostEnvironment environment;
     private readonly IConfiguration configuration;
+    private readonly IdentityServerSettings settings;
 
     public Startup(IWebHostEnvironment environment, IConfiguration configuration)
     {
         this.environment = environment;
         this.configuration = configuration;
+        settings = this.configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
     }
 
     public void ConfigureServices(IServiceCollection services)
@@ -33,7 +36,7 @@ public class Startup
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryApiResources(Config.ApiResources)
-            .AddInMemoryClients(Config.Clients)
+            .AddInMemoryClients(settings.Clients)
             .AddDeveloperSigningCredential()
             .AddAspNetIdentity<ApplicationUser>();
     }
@@ -51,7 +54,7 @@ public class Startup
 
         app.UseIdentityServer();
         app.UseCors(
-            options => options.WithOrigins("http://localhost:4200")
+            options => options.WithOrigins(settings.AllowedCorsOrigins)
                 .AllowAnyHeader()
                 .AllowAnyMethod());
         app.UseAuthorization();

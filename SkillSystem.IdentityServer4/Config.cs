@@ -28,48 +28,4 @@ public static class Config
                 Scopes = { "SkillSystem.WebApi" }
             }
         };
-
-    public static IEnumerable<Client> Clients =>
-        new Client[]
-        {
-            new()
-            {
-                ClientId = "skill-system-web",
-                ClientName = "Skill System Web",
-                RequireClientSecret = false,
-                RequirePkce = true,
-                AllowedGrantTypes = GrantTypes.Code,
-                RedirectUris = { "http://localhost:4200/signin-oidc", "http://localhost:4200/refresh-token" },
-                PostLogoutRedirectUris = { "http://localhost:4200" },
-                AllowedScopes =
-                {
-                    IdentityServerConstants.StandardScopes.OpenId,
-                    IdentityServerConstants.StandardScopes.Profile,
-                    "SkillSystem.WebApi",
-                    "roles"
-                },
-                AllowedCorsOrigins = { "http://localhost:4200" },
-            },
-            new()
-            {
-                ClientId = "skill-system-swagger",
-                ClientName = "Skill System Swagger",
-                RequireClientSecret = false,
-                RequirePkce = true,
-                AllowedGrantTypes = GrantTypes.Code,
-                RedirectUris =
-                {
-                    "https://localhost:8000/swagger/oauth2-redirect.html",
-                    "http://localhost:8001/swagger/oauth2-redirect.html"
-                },
-                AllowedScopes =
-                {
-                    IdentityServerConstants.StandardScopes.OpenId,
-                    IdentityServerConstants.StandardScopes.Profile,
-                    "SkillSystem.WebApi",
-                    "roles"
-                },
-                AllowedCorsOrigins = { "https://localhost:8000", "http://localhost:8001" },
-            }
-        };
 }
