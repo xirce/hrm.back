@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Refit;
 using Serilog;
 using Serilog.Events;
@@ -23,6 +24,10 @@ builder.Host.UseSerilog(
             .WriteTo.File(Path.Combine("logs", "log"), rollingInterval: RollingInterval.Day));
 
 builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
+
+builder.Services.Configure<SkillSystemWebApiSettings>(builder.Configuration.GetSection(nameof(SkillSystemWebApiSettings)));
+builder.Services.AddSingleton<SkillSystemWebApiSettings>(
+    sp => sp.GetRequiredService<IOptions<SkillSystemWebApiSettings>>().Value);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<ICurrentUserProvider, CurrentUserProvider>();
@@ -81,7 +86,7 @@ app.UseHttpsRedirection();
 
 app.UseCors(
     options => options.WithOrigins(
-            app.Configuration.GetSection(nameof(SkillSystemWebApiSettings)).Get<SkillSystemWebApiSettings>().WebAppUrl)
+            app.Services.GetRequiredService<SkillSystemWebApiSettings>().WebAppUrl)
         .AllowAnyHeader()
         .AllowAnyMethod());
 

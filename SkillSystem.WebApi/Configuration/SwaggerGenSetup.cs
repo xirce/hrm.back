@@ -7,6 +7,13 @@ namespace SkillSystem.WebApi.Configuration;
 
 public class SwaggerGenSetup : IConfigureOptions<SwaggerGenOptions>
 {
+    private readonly SkillSystemWebApiSettings settings;
+
+    public SwaggerGenSetup(SkillSystemWebApiSettings settings)
+    {
+        this.settings = settings;
+    }
+
     public void Configure(SwaggerGenOptions options)
     {
         options.AddSecurityDefinition(
@@ -17,8 +24,8 @@ public class SwaggerGenSetup : IConfigureOptions<SwaggerGenOptions>
                 {
                     AuthorizationCode = new OpenApiOAuthFlow
                     {
-                        AuthorizationUrl = new Uri("https://localhost:5001/connect/authorize"),
-                        TokenUrl = new Uri("https://localhost:5001/connect/token"),
+                        AuthorizationUrl = new Uri(settings.IdentityBaseUrl + "/connect/authorize"),
+                        TokenUrl = new Uri(settings.IdentityBaseUrl + "/connect/token"),
                         Scopes = new Dictionary<string, string>
                         {
                             ["SkillSystem.WebApi"] = "Skill System Web Api"
