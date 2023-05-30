@@ -49,6 +49,8 @@ public class Startup
             app.EnsureUsersSeeded();
         }
 
+        app.UseMiddleware<PublicFacingUriMiddleware>(settings.IssuerUri);
+
         app.UseStaticFiles();
         app.UseRouting();
 

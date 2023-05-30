@@ -4,6 +4,7 @@ namespace SkillSystem.IdentityServer4.Configuration;
 
 public class IdentityServerSettings
 {
+    public string IssuerUri { get; set; }
     public string[] AllowedCorsOrigins { get; set; }
     public Client[] Clients { get; set; }
 }
