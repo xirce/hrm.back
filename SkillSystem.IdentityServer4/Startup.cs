@@ -32,7 +32,11 @@ public class Startup
             .AddEntityFrameworkStores<SkillSystemIdentityDbContext>()
             .AddDefaultTokenProviders();
 
-        services.AddIdentityServer()
+        services.AddIdentityServer(options =>
+            {
+                options.Authentication.CookieSameSiteMode = SameSiteMode.Unspecified;
+                options.Authentication.CheckSessionCookieSameSiteMode = SameSiteMode.Unspecified;
+            })
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryApiResources(Config.ApiResources)
