@@ -12,6 +12,7 @@ using SkillSystem.Application.Services.Projects;
 using SkillSystem.Application.Services.Roles;
 using SkillSystem.Application.Services.Salaries;
 using SkillSystem.Application.Services.SalariesTransactions;
+using SkillSystem.Application.Services.SalaryRanges;
 using SkillSystem.Application.Services.Skills;
 
 namespace SkillSystem.Application;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IPositionsService, PositionsService>();
         services.AddScoped<IDutiesService, DutiesService>();
         services.AddScoped<ISalariesService, SalariesService>();
+        services.AddScoped<ISalaryRangesService, SalaryRangesService>();
         services.AddScoped<ISalariesTransactionsService, SalariesTransactionsService>();
 
 
