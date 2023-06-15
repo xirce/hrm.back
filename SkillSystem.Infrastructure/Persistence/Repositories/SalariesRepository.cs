@@ -16,7 +16,7 @@ public class SalariesRepository : ISalariesRepository
 
     public async Task<Salary> CreateSalaryAsync(Salary salary)
     {
-        await dbContext.AddAsync(salary);
+        await dbContext.Salaries.AddAsync(salary);
         return salary;
     }
 

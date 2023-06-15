@@ -2,7 +2,9 @@ using Mapster;
 using SkillSystem.Application.Common.Extensions;
 using SkillSystem.Application.Common.Services;
 using SkillSystem.Application.Repositories;
+using SkillSystem.Application.Repositories.Grades;
 using SkillSystem.Application.Repositories.Salaries;
+using SkillSystem.Application.Repositories.SalaryRanges;
 using SkillSystem.Application.Repositories.SalaryTransactions;
 using SkillSystem.Application.Services.Salaries.Models;
 using SkillSystem.Core.Entities;
@@ -14,15 +16,20 @@ public class SalariesTransactionsService : ISalariesTransactionsService
 {
     private readonly ISalariesRepository salariesRepository;
     private readonly ISalaryTransactionsRepository transactionsRepository;
+    private readonly IEmployeeGradesRepository employeeGradesRepository;
+    private readonly ISalaryRangesRepository salaryRangesRepository;
     private readonly IUnitOfWork unitOfWork;
     private readonly ICurrentUserProvider currentUserProvider;
 
     public SalariesTransactionsService(ISalariesRepository salariesRepository,
-        ISalaryTransactionsRepository transactionsRepository,
+        ISalaryTransactionsRepository transactionsRepository, IEmployeeGradesRepository employeeGradesRepository,
+        ISalaryRangesRepository salaryRangesRepository,
         IUnitOfWork unitOfWork, ICurrentUserProvider currentUserProvider)
     {
         this.salariesRepository = salariesRepository;
         this.transactionsRepository = transactionsRepository;
+        this.employeeGradesRepository = employeeGradesRepository;
+        this.salaryRangesRepository = salaryRangesRepository;
         this.unitOfWork = unitOfWork;
         this.currentUserProvider = currentUserProvider;
     }
@@ -32,12 +39,29 @@ public class SalariesTransactionsService : ISalariesTransactionsService
         var currentUser = currentUserProvider.User;
         var userId = currentUser.GetUserId();
         if (!userId.HasValue)
-            throw new NullReferenceException();
+        throw new NullReferenceException();
         Guid changedBy = userId.Value;
+        if (!await CheckSalaryInRange(request.EmployeeId, request.Wage))
+            throw new ValidationException($"The new salary is not in the range: {request.Wage}");
         var salary = await SaveSalaryAsync(request);
         await SaveTransactionAsync(salary, changedBy);
         await unitOfWork.SaveChangesAsync();
         return salary.Id;
+    }
+
+    private async Task<bool> CheckSalaryInRange(Guid employeeId, decimal wage)
+    {
+        var grades = await employeeGradesRepository.FindEmployeeGrades(employeeId);
+        bool salaryInRange = true;
+        if (grades != null && grades.Count > 0)
+        {
+            var grade = grades.First();
+            var salaryRange = await salaryRangesRepository.GetSalaryRangeByGradeAsync(grade.GradeId);
+            if (salaryRange != null)
+                if (salaryRange.MinimumWage > wage || salaryRange.MaximumWage < wage)
+                    salaryInRange = false;
+        }
+        return salaryInRange;
     }
 
     private async Task<Salary> SaveSalaryAsync(SalaryRequest request)
