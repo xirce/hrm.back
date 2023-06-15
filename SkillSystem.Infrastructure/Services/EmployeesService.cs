@@ -31,7 +31,7 @@ public class EmployeesService : IEmployeesService
 
         await unitOfWork.SaveChangesAsync();
 
-        return MergeEmployeeWithUser(employee, userResponse);
+        return MergeUserWithEmployee(userResponse, employee);
     }
 
     public async Task<PaginatedList<Employee>> SearchEmployees(SearchEmployeesRequest request)
@@ -60,7 +60,7 @@ public class EmployeesService : IEmployeesService
 
         await unitOfWork.SaveChangesAsync();
 
-        var employees = JoinEmployeesWithUsers(existingEmployees.Union(notExistingEmployees), searchUsersResponse.Items)
+        var employees = JoinUsersWithEmployees(searchUsersResponse.Items, existingEmployees.Union(notExistingEmployees))
             .ToArray();
 
         return new PaginatedList<Employee>(
@@ -82,11 +82,11 @@ public class EmployeesService : IEmployeesService
         var getSubordinateUsersRequest = new BatchGetUsersRequest(subordinatesIds);
         var getSubordinateUsersResponse = await usersClient.BatchGetUsers(getSubordinateUsersRequest);
 
-        return JoinEmployeesWithUsers(subordinates, getSubordinateUsersResponse.Users)
+        return JoinUsersWithEmployees(getSubordinateUsersResponse.Users, subordinates)
             .ToArray();
     }
 
-    private static Employee MergeEmployeeWithUser(Core.Entities.Employee employee, User user)
+    private static Employee MergeUserWithEmployee(User user, Core.Entities.Employee employee)
     {
         return new Employee
         {
@@ -99,10 +99,10 @@ public class EmployeesService : IEmployeesService
         };
     }
 
-    private static IEnumerable<Employee> JoinEmployeesWithUsers(
-        IEnumerable<Core.Entities.Employee> employees,
-        IEnumerable<User> users)
+    private static IEnumerable<Employee> JoinUsersWithEmployees(
+        IEnumerable<User> users,
+        IEnumerable<Core.Entities.Employee> employees)
     {
-        return employees.Join(users, employee => employee.Id, user => user.Id, MergeEmployeeWithUser);
+        return users.Join(employees, user => user.Id, employee => employee.Id, MergeUserWithEmployee);
     }
 }
