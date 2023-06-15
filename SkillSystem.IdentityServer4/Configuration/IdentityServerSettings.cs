@@ -7,4 +7,5 @@ public class IdentityServerSettings
     public string IssuerUri { get; set; }
     public string[] AllowedCorsOrigins { get; set; }
     public Client[] Clients { get; set; }
+    public UsersApiSettings UsersApiSettings { get; set; }
 }

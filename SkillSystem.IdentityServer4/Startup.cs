@@ -21,6 +21,8 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton(settings.UsersApiSettings);
+
         services.AddControllersWithViews();
 
         services.AddDbContext<SkillSystemIdentityDbContext>(

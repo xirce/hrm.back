@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SkillSystem.IdentityServer4.Configuration;
 using SkillSystem.IdentityServer4.Data.Entities;
 using SkillSystem.IdentityServer4.Models.Common;
 using SkillSystem.IdentityServer4.Models.Users;
@@ -13,10 +14,12 @@ namespace SkillSystem.IdentityServer4.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> userManager;
+    private readonly UsersApiSettings usersApiSettings;
 
-    public UsersController(UserManager<ApplicationUser> userManager)
+    public UsersController(UserManager<ApplicationUser> userManager, UsersApiSettings usersApiSettings)
     {
         this.userManager = userManager;
+        this.usersApiSettings = usersApiSettings;
     }
 
     [HttpGet("{userId}")]
@@ -69,8 +72,12 @@ public class UsersController : ControllerBase
         var usersQuery = userManager.Users.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(lowerQuery))
-            usersQuery = usersQuery.Where(user => EF.Functions.TrigramsSimilarity(user.FullName, lowerQuery) > 0)
+            usersQuery = usersQuery.Where(
+                    user => EF.Functions.TrigramsSimilarity(user.FullName, lowerQuery)
+                            >= usersApiSettings.MinSimilarity)
                 .OrderByDescending(user => EF.Functions.TrigramsSimilarity(user.FullName, lowerQuery));
+        else
+            usersQuery = usersQuery.OrderBy(user => user.FullName);
 
         return usersQuery
             .Skip(offset)
